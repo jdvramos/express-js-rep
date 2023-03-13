@@ -61,6 +61,9 @@ app.use(verifyJWT);
 // employees (API) route
 app.use("/employees", require("./routes/api/employees"));
 
+// users (API) route
+app.use('/users', require('./routes/api/users'));
+
 // catch-all for pages that do not exist (404)
 // app.use('/')
 app.all("*", (req, res) => {

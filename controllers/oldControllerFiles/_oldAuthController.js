@@ -1,6 +1,14 @@
-const User = require('../model/User');
+const usersDB = {
+	users: require('../model/users.json'),
+	setUsers: function (data) {
+		this.users = data;
+	}
+}
+
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const fsPromises = require('fs').promises;
+const path = require('path');
 
 const handleLogin = async (req, res) => {
 	const { user, pwd } = req.body;
@@ -8,7 +16,7 @@ const handleLogin = async (req, res) => {
 	if (!user || !pwd) return res.status(400).json({ 'message': 'Username and password are required.' });
 
 	// check first if username provided does exist in the db
-	const foundUser = await User.findOne({ username: user }).exec();
+	const foundUser = usersDB.users.find(person => person.username === user);
 	if (!foundUser) return res.sendStatus(401); // Unauthorized
 
 	// evaluate password
@@ -35,14 +43,17 @@ const handleLogin = async (req, res) => {
 		);
 
 		// Saving refreshToken with current user
-		foundUser.refreshToken = refreshToken;
-		const result = await foundUser.save();
+		const otherUsers = usersDB.users.filter(person => person.username !== foundUser.username);
+		const currentUser = { ...foundUser, refreshToken }
+		usersDB.setUsers([ ...otherUsers, currentUser]);
 
-		console.log(result);
+		await fsPromises.writeFile(
+			path.join(__dirname, '..', 'model', 'users.json'),
+			JSON.stringify(usersDB.users)
+		);
 
 		// Cookie is sent for every request, however httpOnly is secured because JS can't access it
-		// Remove property 'secure: true' when testing with Thunder Client to make /refresh route work, but put it back because it's required with Chrome when app is deployed
-		res.cookie('jwt', refreshToken, { httpOnly: true, sameSite: 'None', maxAge: 24 * 60 * 60 * 1000});
+		res.cookie('jwt', refreshToken, { httpOnly: true, sameSite: 'None', secure: true, maxAge: 24 * 60 * 60 * 1000});
 
 		res.json({ accessToken });
 	} else {
