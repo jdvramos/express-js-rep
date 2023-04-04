@@ -1,2 +1,4 @@
 20230107	22:02:49	f29a0d44-dec8-4c87-852a-577edf3d6264	Error: Not allowed by CORS
 20230313	19:36:51	c7b95ada-ca0d-4fca-8000-6fe3f3a54a35	SyntaxError: Unexpected token } in JSON at position 62
+20230327	15:52:22	35c754ac-b1b1-443a-8ed3-c5f6070b4d45	Error: Not allowed by CORS
+20230327	15:53:43	49dc6594-179b-41af-9380-948b09aef410	TypeError: res.headers is not a function

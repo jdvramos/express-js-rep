@@ -14,7 +14,8 @@ const handleLogin = async (req, res) => {
 	// evaluate password
 	const match = await bcrypt.compare(pwd, foundUser.password);
 	if (match) {
-		const roles = Object.values(foundUser.roles);
+		// We attached the .filter(Boolean) to remove null values
+		const roles = Object.values(foundUser.roles).filter(Boolean);
 
 		// create JWTs
 		const accessToken = jwt.sign(
@@ -42,9 +43,9 @@ const handleLogin = async (req, res) => {
 
 		// Cookie is sent for every request, however httpOnly is secured because JS can't access it
 		// Remove property 'secure: true' when testing with Thunder Client to make /refresh route work, but put it back because it's required with Chrome when app is deployed
-		res.cookie('jwt', refreshToken, { httpOnly: true, sameSite: 'None', maxAge: 24 * 60 * 60 * 1000});
+		res.cookie('jwt', refreshToken, { httpOnly: true, sameSite: 'None', secure: true, maxAge: 24 * 60 * 60 * 1000});
 
-		res.json({ accessToken });
+		res.json({ roles, accessToken });
 	} else {
 		res.sendStatus(401);
 	}

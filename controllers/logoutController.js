@@ -10,6 +10,7 @@ const handleLogout = async (req, res) => {
 	// check first if refreshToken we get from the cookie does exist in the db
 	const foundUser = await User.findOne({ refreshToken }).exec();
 	if (!foundUser) {
+		// If there's no such user in the db with that refreshToken that we got but the client has cookie named 'jwt' we clear that anyway
 		res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true });
 		return res.sendStatus(204);
 	}
@@ -21,7 +22,7 @@ const handleLogout = async (req, res) => {
 	console.log(result);
 
 	// secure: true - only serves on https
-	res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true }) 
+	res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true });
 
 	res.sendStatus(204);
 }
